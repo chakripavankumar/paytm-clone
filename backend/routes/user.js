@@ -1,123 +1,56 @@
-const express= require("express");
-const jwt = require("jsonwebtoken");
-const {JWT_SECRET}= require("../config");
-const {authMiddleware}= require("../middleware");
-const zod= require('zod');
-const {User} = require("../db");
-const router= express.Router();
 
+// backend/routes/account.js
+const express = require('express');
+const { authMiddleware } = require('../middleware');
+const { Account } = require('../db');
+const { default: mongoose } = require('mongoose');
 
-const signUpscheme = zod.object({
-    username: zod.string(),
-    password:zod.string(),
-    fristName:zod.string(),
-    lastName:zod.string()
-})
-router.post("/signup" ,  async function ( req,res){
-   const {success} = signUpscheme.safeParse(req.body);
-   if(!success){
-    return res.json({
-        message: "Email already taken / Incorrect inputs"
+const router = express.Router();
+
+router.get("/balance", authMiddleware, async (req, res) => {
+    const account = await Account.findOne({
+        userId: req.userId
+    });
+
+    res.json({
+        balance: account.balance
     })
-   }
-   const existingUser= await User.findone({
-    username:req.body.username
-   })
+});
 
-   if(existingUser){
-    return res.status(411).json({
-        message: "Email already taken / Incorrect inputs"
-    })
-   }
+router.post("/transfer", authMiddleware, async (req, res) => {
+    const session = await mongoose.startSession();
 
- const user= await User.create({
-    username:req.body.username,
-    password:req.body.password,
-    fristName:req.body.fristName,
-    lastName: req.body.lastName
- })
- const userId= user._id;
+    session.startTransaction();
+    const { amount, to } = req.body;
 
- const token= jwt.sign({
-    userId
- }, JWT_SECRET)
-   res.json({
-    message: "User created successfully",
-    token: token
-   })
-})
+    // Fetch the accounts within the transaction
+    const account = await Account.findOne({ userId: req.userId }).session(session);
 
- const signinBody= zod.object({
-    username:zod.string().email(),
-    password:zod.string()
- })
+    if (!account || account.balance < amount) {
+        await session.abortTransaction();
+        return res.status(400).json({
+            message: "Insufficient balance"
+        });
+    }
 
- router.post("/sinin" ,  async(req,res)=>{
-          const {success} = signinBody.safeParse(req.body);
-          if(!success){
-           return res.status(411).json({
-            message:"incorrect inputs"
-            })
-          }
+    const toAccount = await Account.findOne({ userId: to }).session(session);
 
-          const user= await User.findone({
-            username:req.body.username,
-            password:req.body.password
-          })
-          if(user){
-            const token= jwt.sign({
-                userId:user._id
-            },JWT_SECRET);
-            res.json({
-                token:token
-            })
-            return
-          }
+    if (!toAccount) {
+        await session.abortTransaction();
+        return res.status(400).json({
+            message: "Invalid account"
+        });
+    }
 
-          res.status(411).json({
-            message:"error while loging in"
-          })
- })
- 
-    const UpdateBody= zod.object({
-    password: zod.string().optional(),
-	firstName: zod.string().optional(),
-	lastName: zod.string().optional()
-    })
-    router.put("/user" ,  async(req,res)=>{
-        const {success}= UpdateBody.safeParse(req.body);
-        if(!success){
-            res.status(411).json({
-                message: "Error while updating information"
-            })
-        }
-      await User.updateOne({_id:req.userId}, req.body);
-      res.json({
-        message: "Updated successfully"
-      })
- })
+    // Perform the transfer
+    await Account.updateOne({ userId: req.userId }, { $inc: { balance: -amount } }).session(session);
+    await Account.updateOne({ userId: to }, { $inc: { balance: amount } }).session(session);
 
- router.get("/bulk" , async  (req,res)=>{
-   const filter = req.query.filter || "" ;
+    // Commit the transaction
+    await session.commitTransaction();
+    res.json({
+        message: "Transfer successful"
+    });
+});
 
-   const users= await  User.find({
-    $or:[{
-        firstName: {
-            "$regex": filter
-        }
-    }, {
-        lastName: {
-            "$regex": filter
-        }
-    }]
-   })
-   res.json({
-    user:users.map(user =>({
-         username:user.username,
-         fristName:user.firstName,
-         lastName:user.lastName,
-         _id:user._id
-    }))
-   })
-  })
-module.exports=router
+module.exports = router;
