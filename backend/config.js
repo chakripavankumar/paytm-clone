@@ -1,5 +1,4 @@
- const JWT_TOKEN= "PAVAN_24";
- 
- module.exports= {
-    JWT_TOKEN
- }
+
+module.exports = {
+   JWT_SECRET: "PAVAN_24"
+};

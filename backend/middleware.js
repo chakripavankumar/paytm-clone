@@ -4,8 +4,8 @@ const jwt = require("jsonwebtoken");
 const authMiddleware = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(403).json({});
+    if (!authHeader || !authHeader.startsWith('Bearer')) {
+        return res.status(403).json({ error: "Unauthorized" });
     }
 
     const token = authHeader.split(' ')[1];
@@ -17,10 +17,11 @@ const authMiddleware = (req, res, next) => {
 
         next();
     } catch (err) {
-        return res.status(403).json({});
+        console.error("JWT verification failed:", err);
+        return res.status(403).json({ error: "Unauthorized" });
     }
 };
 
 module.exports = {
     authMiddleware
-}
+};
