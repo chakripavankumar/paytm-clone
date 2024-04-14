@@ -1,7 +1,9 @@
+import { Heading } from "../components/Heading";
+
  function Signup(){
   return(
     <div>
-    this is sinup
+<Heading label={"Signup"}/>
     </div>
   )
 }

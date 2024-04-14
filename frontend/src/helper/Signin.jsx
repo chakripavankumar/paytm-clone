@@ -1,11 +1,10 @@
+import { Heading } from "../components/Heading"
 
 
 const Signin = () => {
   return (
     <div>
-      <h1>
-      hey there this from sign in
-      </h1>
+      <Heading label={"Signin"}/>
     </div>
   )
 }
