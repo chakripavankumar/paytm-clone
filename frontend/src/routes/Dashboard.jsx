@@ -1,11 +1,12 @@
+import { AppBar } from "../components/AppBar";
 
-function Signup(){
+function Dashboard(){
   return(
     <div>
-    this is nnn
+   <AppBar/>
     </div>
   )
 }
 
-export default Signup;
+export default Dashboard;
 
