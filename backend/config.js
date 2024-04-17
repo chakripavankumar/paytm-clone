@@ -1,4 +1,4 @@
-
+//backend/config.js
 module.exports = {
-   JWT_SECRET: "PAVAN_24"
-};
+	JWT_SECRET: "your-jwt-secret"
+}
