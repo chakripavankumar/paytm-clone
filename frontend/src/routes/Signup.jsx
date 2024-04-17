@@ -1,7 +1,8 @@
 import { Heading } from "../components/Heading";
 import { InputBox } from "../components/InputBox";
 import { SubHeading } from "../components/SubHeading";
-import{Button}  from "../components/Button"
+import{Button}  from "../components/Button";
+import {BottomWarning} from "../components/BottomWarning"
 
  function Signup(){
   return(
@@ -17,7 +18,10 @@ import{Button}  from "../components/Button"
       <div className="pt-4">
       <Button label={"SignUp"}/>
       </div>
-</div>
+      <BottomWarning label={"Already have an account"} buttonText={"SignIn"} to={"/signin"}/>
+    
+      
+   </div>
     </div>
     </div>
   )
