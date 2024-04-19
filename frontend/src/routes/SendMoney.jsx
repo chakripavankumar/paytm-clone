@@ -1,7 +1,10 @@
+import Transfer from "../components/Transfer";
+
+
 function Signup(){
   return(
     <div>
-    this is mm
+   <Transfer/>
     </div>
   )
 }
