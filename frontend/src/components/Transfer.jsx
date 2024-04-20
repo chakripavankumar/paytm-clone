@@ -1,4 +1,4 @@
-export const Transfer = () => {
+ const Transfer = () => {
     return <div className="flex justify-center h-screen bg-gray-100">
         <div className="h-full flex flex-col justify-center">
             <div
@@ -38,3 +38,5 @@ export const Transfer = () => {
       </div>
     </div>
 }
+
+export default Transfer;
