@@ -1,9 +1,10 @@
-
+ import {AppBar } from "./AppBar"
 
 const Homepage = () => {
   return (
     <div>
-    <img src="./public/Designer.png"></img>
+    <AppBar />
+    <img src="./Designer.png"></img>
     </div>
   )
 }
